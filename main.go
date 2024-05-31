@@ -28,18 +28,25 @@ func tinyCspQueens() {
 	vars := make([]variables.Variable, 0, n)
 
 	for i := 0; i < n; i++ {
-		vars = append(vars, solver.MakeVariable(n))
+		vars = append(vars, solver.MakeVariable(fmt.Sprintf("x_%d", i), n))
 	}
 
 	for i := 0; i < n; i++ {
 		for j := i + 1; j < n; j++ {
 			solver.NotEqual(vars[i], vars[j], 0)
+			solver.NotEqual(vars[i], vars[j], j-i)
+			solver.NotEqual(vars[i], vars[j], i-j)
 		}
 	}
 
+	nbSolutions := 0
+
 	solver.Solve(func(solution []int) {
 		fmt.Print(DisplayBoard(solution))
+		nbSolutions++
 	})
+
+	fmt.Println("Solutions: ", nbSolutions)
 }
 
 func main() {

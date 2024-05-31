@@ -12,13 +12,13 @@ type notEqual struct {
 	offset int
 }
 
-var emptyDomain = errors.New("empty domain")
+var errEmptyDomain = errors.New("empty domain")
 
 // Propagate implements Constraint.
 // Todo: error to be implemented
 func (n notEqual) Propagate() (bool, error) {
-	if n.v1.Dom().Fixed() && n.v2.Dom().Fixed() && n.v1.Dom().Min() == n.v2.Dom().Min() {
-		return true, emptyDomain
+	if n.v1.Dom().Fixed() && n.v2.Dom().Fixed() && n.v1.Dom().Min() == n.v2.Dom().Min() + n.offset {
+		return true, errEmptyDomain
 	}
 
 	if n.v1.Dom().Fixed() {
@@ -26,7 +26,7 @@ func (n notEqual) Propagate() (bool, error) {
 	}
 
 	if n.v2.Dom().Fixed() {
-		return n.v1.Dom().Remove(n.v2.Dom().Min() - n.offset), nil
+		return n.v1.Dom().Remove(n.v2.Dom().Min() + n.offset), nil
 	}
 
 	return false, nil

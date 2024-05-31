@@ -1,6 +1,7 @@
 package variables
 
 type Variable interface {
+	Name() string
 	Dom() Domain
 	SetDom(Domain)
 }

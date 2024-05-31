@@ -1,9 +1,18 @@
 package variables
 
-import "log"
+import (
+	"fmt"
+	"log"
+)
 
 type IntVariable struct {
+	name   string
 	domain Domain
+}
+
+// Name implements Variable.
+func (v *IntVariable) Name() string {
+	return v.name
 }
 
 // Dom implements Variable.
@@ -57,7 +66,7 @@ func (d EnumeratedDomain) Fixed() bool {
 // Max implements Domain.
 func (d EnumeratedDomain) Max() int {
 	if d.Empty() {
-		log.Fatal("Empty domain")
+		log.Fatal("Empty domain in Max")
 	}
 
 	maxVal := d.Values[0]
@@ -72,7 +81,7 @@ func (d EnumeratedDomain) Max() int {
 // Min implements Domain.
 func (d EnumeratedDomain) Min() int {
 	if d.Empty() {
-		log.Fatal("Empty domain")
+		log.Fatal("Empty domain in Min")
 	}
 
 	minVal := d.Values[0]
@@ -88,8 +97,13 @@ func (d EnumeratedDomain) Min() int {
 func (d *EnumeratedDomain) Remove(value int) bool {
 	for i := 0; i < len(d.Values); i++ {
 		if d.Values[i] == value {
+
+			log.Printf("before remove: %v", d)
+
 			d.Values[i] = d.Values[len(d.Values)-1]
 			d.Values = d.Values[:len(d.Values)-1]
+
+			log.Printf("after remove: %v", d)
 			return true
 		}
 	}
@@ -97,11 +111,16 @@ func (d *EnumeratedDomain) Remove(value int) bool {
 }
 
 func (d EnumeratedDomain) Empty() bool {
-	return len(d.Values) > 0
+	return len(d.Values) == 0
 }
 
-func NewIntVariable(domSize int) IntVariable {
+func (d EnumeratedDomain) String() string {
+	return fmt.Sprintf("%#v", d.Values)
+}
+
+func NewIntVariable(name string, domSize int) IntVariable {
 	return IntVariable{
+		name:   name,
 		domain: newEnumeratedDomain(domSize),
 	}
 }
