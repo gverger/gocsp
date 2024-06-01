@@ -2,7 +2,8 @@ package variables
 
 import (
 	"fmt"
-	"log"
+	log "log/slog"
+	"os"
 )
 
 type IntVariable struct {
@@ -66,7 +67,8 @@ func (d EnumeratedDomain) Fixed() bool {
 // Max implements Domain.
 func (d EnumeratedDomain) Max() int {
 	if d.Empty() {
-		log.Fatal("Empty domain in Max")
+		log.Error("Empty domain in Max")
+		os.Exit(1)
 	}
 
 	maxVal := d.Values[0]
@@ -81,7 +83,8 @@ func (d EnumeratedDomain) Max() int {
 // Min implements Domain.
 func (d EnumeratedDomain) Min() int {
 	if d.Empty() {
-		log.Fatal("Empty domain in Min")
+		log.Error("Empty domain in Min")
+		os.Exit(1)
 	}
 
 	minVal := d.Values[0]
@@ -97,13 +100,8 @@ func (d EnumeratedDomain) Min() int {
 func (d *EnumeratedDomain) Remove(value int) bool {
 	for i := 0; i < len(d.Values); i++ {
 		if d.Values[i] == value {
-
-			log.Printf("before remove: %v", d)
-
 			d.Values[i] = d.Values[len(d.Values)-1]
 			d.Values = d.Values[:len(d.Values)-1]
-
-			log.Printf("after remove: %v", d)
 			return true
 		}
 	}

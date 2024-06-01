@@ -1,10 +1,10 @@
 package tinycsp
 
 import (
-	"log"
+	log "log/slog"
 
-	"gverger.com/constraints/tinyCsp/constraints"
-	"gverger.com/constraints/tinyCsp/variables"
+	"gverger.com/csp/tinyCsp/constraints"
+	"gverger.com/csp/tinyCsp/variables"
 )
 
 type TinyCsp struct {
@@ -24,39 +24,39 @@ func NewTinyCsp() TinyCsp {
 }
 
 func (csp TinyCsp) Solve(onSolution func(solution []int)) {
-	log.Printf("Selecting variable")
+	log.Debug("Selecting variable")
 	variable, foundBranchingVar := csp.selectVariable()
 	if !foundBranchingVar {
 		exportSolution(csp.Variables, onSolution)
 		return
 	}
 
-	log.Printf("Chosen %s", variable.Name())
+	log.Debug("Chosen %s", variable.Name())
 	val := variable.Dom().Min()
 
 	backup := csp.backupDomains()
 
-	log.Printf("%s <- %d", variable.Name(), val)
+	log.Debug("%s <- %d", variable.Name(), val)
 	if variable.Dom().Fix(val) {
-		log.Printf("Fixing point")
+		log.Debug("Fixing point")
 		err := csp.fixPoint()
 		if err == nil {
-			log.Printf("Go deeper")
+			log.Debug("Go deeper")
 			csp.Solve(onSolution)
 		}
 	}
 
-	log.Printf("Restore")
+	log.Debug("Restore")
 	csp.restoreDomains(backup)
 
-	log.Printf("Remove Value %d for %s", val, variable.Name())
+	log.Debug("Remove Value %d for %s", val, variable.Name())
 	variable.Dom().Remove(val)
 	if variable.Dom().Empty() {
-		log.Printf("Domain is empty")
+		log.Debug("Domain is empty")
 		return
 	}
 	if err := csp.fixPoint(); err != nil {
-		log.Printf("Fix point inconsistent")
+		log.Debug("Fix point inconsistent")
 		return
 	}
 	csp.Solve(onSolution)

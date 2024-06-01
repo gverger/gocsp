@@ -2,29 +2,29 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"os"
+	"runtime/pprof"
 
-	tinycsp "gverger.com/constraints/tinyCsp"
-	"gverger.com/constraints/tinyCsp/variables"
+	tinycsp "gverger.com/csp/tinyCsp"
+	"gverger.com/csp/tinyCsp/variables"
 )
 
-func specializedQueens() {
-	solver := NewQueenSolver(10)
+func specializedQueens(n int) {
+	solver := NewQueenSolver(n)
 
 	nbSolutions := 0
 	solver.Solve(func(positions []int) {
-		log.Println("Solution found")
-		fmt.Println(DisplayBoard(positions))
+		// log.Info("Solution found")
+		// fmt.Println(DisplayBoard(positions))
 		nbSolutions++
 	})
 
 	fmt.Println("Solutions: ", nbSolutions)
 }
 
-func tinyCspQueens() {
+func tinyCspQueens(n int) {
 	solver := tinycsp.NewTinyCsp()
 
-	n := 10
 	vars := make([]variables.Variable, 0, n)
 
 	for i := 0; i < n; i++ {
@@ -42,7 +42,7 @@ func tinyCspQueens() {
 	nbSolutions := 0
 
 	solver.Solve(func(solution []int) {
-		fmt.Print(DisplayBoard(solution))
+		// fmt.Print(DisplayBoard(solution))
 		nbSolutions++
 	})
 
@@ -50,5 +50,19 @@ func tinyCspQueens() {
 }
 
 func main() {
-	tinyCspQueens()
+	// Start profiling
+	f, err := os.Create("myprogram.prof")
+	if err != nil {
+
+		fmt.Println(err)
+		return
+
+	}
+	pprof.StartCPUProfile(f)
+	defer pprof.StopCPUProfile()
+
+	// Run your program here
+	tinyCspQueens(12)
+
+	// specializedQueens(12)
 }

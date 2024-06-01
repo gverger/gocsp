@@ -3,7 +3,7 @@ package constraints
 import (
 	"errors"
 
-	"gverger.com/constraints/tinyCsp/variables"
+	"gverger.com/csp/tinyCsp/variables"
 )
 
 type notEqual struct {
@@ -17,7 +17,7 @@ var errEmptyDomain = errors.New("empty domain")
 // Propagate implements Constraint.
 // Todo: error to be implemented
 func (n notEqual) Propagate() (bool, error) {
-	if n.v1.Dom().Fixed() && n.v2.Dom().Fixed() && n.v1.Dom().Min() == n.v2.Dom().Min() + n.offset {
+	if n.v1.Dom().Fixed() && n.v2.Dom().Fixed() && n.v1.Dom().Min() == n.v2.Dom().Min()+n.offset {
 		return true, errEmptyDomain
 	}
 
