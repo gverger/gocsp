@@ -23,15 +23,14 @@ func NewTinyCsp() TinyCsp {
 	}
 }
 
-func (csp TinyCsp) Solve(onSolution func(solution []int)) {
+func (csp TinyCsp) Solve(onSolution func(solution []int) bool) bool {
 	log.Debug("Selecting variable")
 	variable, foundBranchingVar := csp.selectVariable()
 	if !foundBranchingVar {
-		exportSolution(csp.Variables, onSolution)
-		return
+		return exportSolution(csp.Variables, onSolution)
 	}
 
-	log.Debug("Chosen %s", variable.Name())
+	log.Debug("variable chosen", log.String("variable", variable.Name()))
 	val := variable.Dom().Min()
 
 	backup := csp.backupDomains()
@@ -42,32 +41,34 @@ func (csp TinyCsp) Solve(onSolution func(solution []int)) {
 		err := csp.fixPoint()
 		if err == nil {
 			log.Debug("Go deeper")
-			csp.Solve(onSolution)
+			if !csp.Solve(onSolution) {
+				return false
+			}
 		}
 	}
 
 	log.Debug("Restore")
 	csp.restoreDomains(backup)
 
-	log.Debug("Remove Value %d for %s", val, variable.Name())
+	log.Debug("value removed", log.Int("value", val), log.String("variable", variable.Name()))
 	variable.Dom().Remove(val)
 	if variable.Dom().Empty() {
 		log.Debug("Domain is empty")
-		return
+		return true
 	}
 	if err := csp.fixPoint(); err != nil {
 		log.Debug("Fix point inconsistent")
-		return
+		return true
 	}
-	csp.Solve(onSolution)
+	return csp.Solve(onSolution)
 }
 
-func exportSolution(variables []variables.Variable, callback func(solution []int)) {
+func exportSolution(variables []variables.Variable, callback func(solution []int) bool) bool {
 	solution := make([]int, len(variables))
 	for i := 0; i < len(variables); i++ {
 		solution[i] = variables[i].Dom().Min()
 	}
-	callback(solution)
+	return callback(solution)
 }
 
 func (csp TinyCsp) selectVariable() (variables.Variable, bool) {

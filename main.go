@@ -41,9 +41,9 @@ func tinyCspQueens(n int) {
 
 	nbSolutions := 0
 
-	solver.Solve(func(solution []int) {
-		// fmt.Print(DisplayBoard(solution))
+	solver.Solve(func(solution []int) bool {
 		nbSolutions++
+		return true
 	})
 
 	fmt.Println("Solutions: ", nbSolutions)
