@@ -12,6 +12,11 @@ type notEqual struct {
 	offset int
 }
 
+// IsDone implements Constraint.
+func (n notEqual) IsDone() bool {
+	return n.v1.Dom().Fixed() || n.v2.Dom().Fixed()
+}
+
 var errEmptyDomain = errors.New("empty domain")
 
 // Propagate implements Constraint.

@@ -1,9 +1,16 @@
 package variables
 
+type BoundConstraint interface{
+	IsDone() bool
+}
+
 type Variable interface {
 	Name() string
 	Dom() Domain
 	SetDom(Domain)
+	NbConstraints() int
+	ConstraintAdded(BoundConstraint)
+	Constraints()
 }
 
 type Domain interface {

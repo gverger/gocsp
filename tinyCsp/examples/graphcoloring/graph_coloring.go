@@ -37,7 +37,7 @@ func Solve(instance Instance) ([]int, bool) {
 	}
 
 	var sol []int
-	csp.Solve(tinycsp.MinDomVar, func(solution []int) bool {
+	csp.Solve(tinycsp.DomOverDegVar, func(solution []int) bool {
 		sol = solution
 		return true
 	})

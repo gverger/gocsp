@@ -117,6 +117,23 @@ func MinDomVar(csp TinyCsp) (variables.Variable, bool) {
 	return bestVar, bestVar != nil
 }
 
+func DomOverDegVar(csp TinyCsp) (variables.Variable, bool) {
+	minDomOverDeg := math.MaxFloat32
+	var bestVar variables.Variable
+
+	for _, variable := range csp.Variables {
+		if variable.Dom().Fixed() {
+			continue
+		}
+		domOverDeg := float64(variable.Dom().Size()) / float64(variable.NbConstraints())
+		if domOverDeg < minDomOverDeg {
+			minDomOverDeg = domOverDeg
+			bestVar = variable
+		}
+	}
+	return bestVar, bestVar != nil
+}
+
 func (csp *TinyCsp) restoreDomains(backup []variables.Domain) {
 	for i := 0; i < len(csp.Variables); i++ {
 		csp.Variables[i].SetDom(backup[i])
@@ -164,6 +181,8 @@ func (csp *TinyCsp) NotEqual(v1, v2 variables.Variable, offset int) constraints.
 	c := constraints.NotEqualOffset(v1, v2, offset)
 
 	csp.Constraints = append(csp.Constraints, c)
+	v1.ConstraintAdded(c)
+	v2.ConstraintAdded(c)
 
 	return c
 }

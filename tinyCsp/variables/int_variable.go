@@ -7,12 +7,33 @@ import (
 )
 
 type IntVariable struct {
-	name   string
-	domain Domain
+	name        string
+	domain      Domain
+	constraints []BoundConstraint
+}
+
+// Constraints implements Variable.
+func (v *IntVariable) Constraints() {
+}
+
+// ConstraintAdded implements Variable.
+func (v *IntVariable) ConstraintAdded(c BoundConstraint) {
+	v.constraints = append(v.constraints, c)
+}
+
+// NbConstraints implements Variable.
+func (v IntVariable) NbConstraints() int {
+	n := 0
+	for _, c := range v.constraints {
+		if !c.IsDone() {
+			n++
+		}
+	}
+	return n
 }
 
 // Name implements Variable.
-func (v *IntVariable) Name() string {
+func (v IntVariable) Name() string {
 	return v.name
 }
 
