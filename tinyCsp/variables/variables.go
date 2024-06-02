@@ -8,6 +8,7 @@ type Variable interface {
 
 type Domain interface {
 	Empty() bool
+	Size() int
 	Fixed() bool
 	Min() int
 	Remove(value int) bool // true if removed

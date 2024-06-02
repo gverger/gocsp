@@ -10,6 +10,11 @@ type BitSetDomain struct {
 	Values *bitset.BitSet
 }
 
+// Size implements Domain.
+func (b *BitSetDomain) Size() int {
+	return int(b.Values.Count())
+}
+
 func newBitsetDomain(domSize int) *BitSetDomain {
 	return &BitSetDomain{
 		Values: bitset.New(uint(domSize)).SetAll(),

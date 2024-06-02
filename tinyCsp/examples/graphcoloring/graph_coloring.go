@@ -37,7 +37,7 @@ func Solve(instance Instance) ([]int, bool) {
 	}
 
 	var sol []int
-	csp.Solve(tinycsp.FirstVar, func(solution []int) bool {
+	csp.Solve(tinycsp.MinDomVar, func(solution []int) bool {
 		sol = solution
 		return true
 	})
@@ -63,10 +63,6 @@ func readFile(filename string) Instance {
 	n := must(strconv.Atoi(numbers[0]))
 	e := must(strconv.Atoi(numbers[1]))
 	nbCol := must(strconv.Atoi(numbers[2]))
-
-	// l.Infof("Layer 1: %d nodes", layer1Size)
-	// l.Infof("Layer 2: %d nodes", layer2Size)
-	// l.Infof("Edges: %d", edgesCount)
 
 	log.Info("reading instance", log.Int("n", n), log.Int("edges", e), log.Int("colors", nbCol))
 

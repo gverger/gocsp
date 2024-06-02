@@ -2,6 +2,7 @@ package tinycsp
 
 import (
 	log "log/slog"
+	"math"
 
 	"gverger.com/csp/tinyCsp/constraints"
 	"gverger.com/csp/tinyCsp/variables"
@@ -80,6 +81,40 @@ func FirstVar(csp TinyCsp) (variables.Variable, bool) {
 		}
 	}
 	return nil, false
+}
+
+func MaxDomVar(csp TinyCsp) (variables.Variable, bool) {
+	maxDom := 0
+	var bestVar variables.Variable
+
+	for _, variable := range csp.Variables {
+		if variable.Dom().Fixed() {
+			continue
+		}
+		domSize := variable.Dom().Size()
+		if domSize > maxDom {
+			maxDom = domSize
+			bestVar = variable
+		}
+	}
+	return bestVar, bestVar != nil
+}
+
+func MinDomVar(csp TinyCsp) (variables.Variable, bool) {
+	minDom := math.MaxInt
+	var bestVar variables.Variable
+
+	for _, variable := range csp.Variables {
+		if variable.Dom().Fixed() {
+			continue
+		}
+		domSize := variable.Dom().Size()
+		if domSize < minDom {
+			minDom = domSize
+			bestVar = variable
+		}
+	}
+	return bestVar, bestVar != nil
 }
 
 func (csp *TinyCsp) restoreDomains(backup []variables.Domain) {

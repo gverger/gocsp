@@ -29,6 +29,11 @@ type EnumeratedDomain struct {
 	Values []int
 }
 
+// Size implements Domain.
+func (d *EnumeratedDomain) Size() int {
+	return len(d.Values)
+}
+
 // Fix implements Domain.
 func (d *EnumeratedDomain) Fix(value int) bool {
 	for _, val := range d.Values {
