@@ -37,7 +37,7 @@ func Solve(instance Instance) ([]int, bool) {
 	}
 
 	var sol []int
-	csp.Solve(func(solution []int) bool {
+	csp.Solve(tinycsp.FirstVar, func(solution []int) bool {
 		sol = solution
 		return true
 	})

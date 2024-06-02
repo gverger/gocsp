@@ -23,9 +23,11 @@ func NewTinyCsp() TinyCsp {
 	}
 }
 
-func (csp TinyCsp) Solve(onSolution func(solution []int) bool) bool {
+type VarSelection func(csp TinyCsp) (variables.Variable, bool)
+
+func (csp TinyCsp) Solve(selectVar VarSelection, onSolution func(solution []int) bool) bool {
 	log.Debug("Selecting variable")
-	variable, foundBranchingVar := csp.selectVariable()
+	variable, foundBranchingVar := selectVar(csp)
 	if !foundBranchingVar {
 		return exportSolution(csp.Variables, onSolution)
 	}
@@ -41,7 +43,7 @@ func (csp TinyCsp) Solve(onSolution func(solution []int) bool) bool {
 		err := csp.fixPoint()
 		if err == nil {
 			log.Debug("Go deeper")
-			if !csp.Solve(onSolution) {
+			if !csp.Solve(selectVar, onSolution) {
 				return false
 			}
 		}
@@ -60,7 +62,7 @@ func (csp TinyCsp) Solve(onSolution func(solution []int) bool) bool {
 		log.Debug("Fix point inconsistent")
 		return true
 	}
-	return csp.Solve(onSolution)
+	return csp.Solve(selectVar, onSolution)
 }
 
 func exportSolution(variables []variables.Variable, callback func(solution []int) bool) bool {
@@ -71,7 +73,7 @@ func exportSolution(variables []variables.Variable, callback func(solution []int
 	return callback(solution)
 }
 
-func (csp TinyCsp) selectVariable() (variables.Variable, bool) {
+func FirstVar(csp TinyCsp) (variables.Variable, bool) {
 	for _, variable := range csp.Variables {
 		if !variable.Dom().Fixed() {
 			return variable, true

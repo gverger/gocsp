@@ -41,7 +41,7 @@ func tinyCspQueens(n int) {
 
 	nbSolutions := 0
 
-	solver.Solve(func(solution []int) bool {
+	solver.Solve(tinycsp.FirstVar, func(solution []int) bool {
 		nbSolutions++
 		return true
 	})
