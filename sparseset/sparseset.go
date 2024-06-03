@@ -114,6 +114,23 @@ func (s *Set) RemoveAbove(value int) {
 	}
 }
 
+// Remove all values strictly greater than value
+func (s *Set) RemoveAllBut(value int) {
+	if !s.Contains(value) {
+		panic("remove all but non contained value")
+	}
+
+	value -= s.offset
+
+	if s.index[value] != 0 {
+		s.exchangeValues(s.index[value], 0)
+	}
+
+	s.Size = 1
+	s.min = value
+	s.max = value
+}
+
 // Return true if the value is in the set
 func (s *Set) Contains(value int) bool {
 	value -= s.offset

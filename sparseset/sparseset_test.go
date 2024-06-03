@@ -170,6 +170,18 @@ func TestRemoveBelowAll(t *testing.T) {
 	is.True(!s.Contains(7))
 }
 
+func TestRemoveAllButExisting(t *testing.T) {
+	is := is.New(t)
+
+	s := NewSet(10, 4)
+	s.RemoveAllBut(7)
+	is.Equal(s.AllValues(), []int{7})
+	is.NoErr(errorOf(s.Max()))
+	is.NoErr(errorOf(s.Min()))
+	is.Equal(valueOf(s.Max()), 7)
+	is.Equal(valueOf(s.Min()), 7)
+}
+
 func errorOf[T any](_ T, err error) error {
 	return err
 }
