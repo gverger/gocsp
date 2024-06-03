@@ -1,5 +1,11 @@
 package sparseset
 
+import (
+	"errors"
+)
+
+var errNoElement = errors.New("no such element")
+
 type Set struct {
 	values []int
 	index  []int
@@ -33,18 +39,20 @@ func NewSet(n int, offset int) *Set {
 	}
 }
 
-func (s Set) Min() int {
+// Return the min value, with an error if the set is empty
+func (s Set) Min() (int, error) {
 	if s.IsEmpty() {
-		panic("empty set")
+		return 0, errNoElement
 	}
-	return s.min + s.offset
+	return s.min + s.offset, nil
 }
 
-func (s Set) Max() int {
+// Return the max value, with an error if the set is empty
+func (s Set) Max() (int, error) {
 	if s.IsEmpty() {
-		panic("empty set")
+		return 0, errNoElement
 	}
-	return s.max + s.offset
+	return s.max + s.offset, nil
 }
 
 // Return all values of the set in order
@@ -71,6 +79,39 @@ func (s *Set) Remove(value int) bool {
 	s.Size--
 	s.updateBoundsValRemoved(value)
 	return true
+}
+
+// Remove all values
+func (s *Set) RemoveAll() {
+	s.Size = 0
+}
+
+// Remove all values strictly smaller than value
+func (s *Set) RemoveBelow(value int) {
+	if s.IsEmpty() {
+		return
+	}
+	if s.max+s.offset < value {
+		s.RemoveAll()
+	} else {
+		for val := s.min; val < value-s.offset; val++ {
+			s.Remove(val + s.offset)
+		}
+	}
+}
+
+// Remove all values strictly greater than value
+func (s *Set) RemoveAbove(value int) {
+	if s.IsEmpty() {
+		return
+	}
+	if s.min+s.offset > value {
+		s.RemoveAll()
+	} else {
+		for val := value - s.offset + 1; val <= s.max; val++ {
+			s.Remove(val + s.offset)
+		}
+	}
 }
 
 // Return true if the value is in the set
