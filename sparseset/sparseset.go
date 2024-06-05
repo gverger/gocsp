@@ -2,6 +2,8 @@ package sparseset
 
 import (
 	"errors"
+
+	"gverger.com/csp/statemanager"
 )
 
 var errNoElement = errors.New("no such element")
@@ -13,13 +15,13 @@ type Set struct {
 	n      int
 	offset int
 
-	Size int // nb of values
-	min  int // min value (before offset)
-	max  int // max value (before offset)
+	size *statemanager.StateInt // nb of values
+	min  *statemanager.StateInt // min value (before offset)
+	max  *statemanager.StateInt // max value (before offset)
 }
 
 // Create a set of n consecutive values starting at offset
-func NewSet(n int, offset int) *Set {
+func NewSet(stateManager *statemanager.StateManager, n int, offset int) *Set {
 	values := make([]int, n)
 	for i := 0; i < n; i++ {
 		values[i] = i
@@ -33,10 +35,14 @@ func NewSet(n int, offset int) *Set {
 		index:  index,
 		n:      n,
 		offset: offset,
-		Size:   n,
-		min:    0,
-		max:    n - 1,
+		size:   stateManager.NewInt(n),
+		min:    stateManager.NewInt(0),
+		max:    stateManager.NewInt(n - 1),
 	}
+}
+
+func (s Set) Size() int {
+	return s.size.Value
 }
 
 // Return the min value, with an error if the set is empty
@@ -44,7 +50,7 @@ func (s Set) Min() (int, error) {
 	if s.IsEmpty() {
 		return 0, errNoElement
 	}
-	return s.min + s.offset, nil
+	return s.min.Value + s.offset, nil
 }
 
 // Return the max value, with an error if the set is empty
@@ -52,14 +58,14 @@ func (s Set) Max() (int, error) {
 	if s.IsEmpty() {
 		return 0, errNoElement
 	}
-	return s.max + s.offset, nil
+	return s.max.Value + s.offset, nil
 }
 
 // Return all values of the set in order
 func (s Set) AllValues() []int {
-	values := make([]int, 0, s.Size)
+	values := make([]int, 0, s.size.Value)
 	for i := 0; i < s.n; i++ {
-		if s.index[i] < s.Size {
+		if s.index[i] < s.size.Value {
 			values = append(values, i+s.offset)
 		}
 	}
@@ -74,16 +80,16 @@ func (s *Set) Remove(value int) bool {
 	}
 
 	value -= s.offset
-	s.exchangeValues(s.index[value], s.Size-1)
+	s.exchangeValues(s.index[value], s.size.Value-1)
 
-	s.Size--
+	s.size.Value--
 	s.updateBoundsValRemoved(value)
 	return true
 }
 
 // Remove all values
 func (s *Set) RemoveAll() {
-	s.Size = 0
+	s.size.Value = 0
 }
 
 // Remove all values strictly smaller than value
@@ -91,10 +97,10 @@ func (s *Set) RemoveBelow(value int) {
 	if s.IsEmpty() {
 		return
 	}
-	if s.max+s.offset < value {
+	if s.max.Value+s.offset < value {
 		s.RemoveAll()
 	} else {
-		for val := s.min; val < value-s.offset; val++ {
+		for val := s.min.Value; val < value-s.offset; val++ {
 			s.Remove(val + s.offset)
 		}
 	}
@@ -105,10 +111,10 @@ func (s *Set) RemoveAbove(value int) {
 	if s.IsEmpty() {
 		return
 	}
-	if s.min+s.offset > value {
+	if s.min.Value+s.offset > value {
 		s.RemoveAll()
 	} else {
-		for val := value - s.offset + 1; val <= s.max; val++ {
+		for val := value - s.offset + 1; val <= s.max.Value; val++ {
 			s.Remove(val + s.offset)
 		}
 	}
@@ -126,9 +132,9 @@ func (s *Set) RemoveAllBut(value int) {
 		s.exchangeValues(s.index[value], 0)
 	}
 
-	s.Size = 1
-	s.min = value
-	s.max = value
+	s.size.Value = 1
+	s.min.Value = value
+	s.max.Value = value
 }
 
 // Return true if the value is in the set
@@ -141,11 +147,11 @@ func (s *Set) contains(value int) bool {
 	if value < 0 || value >= s.n {
 		return false
 	}
-	return s.index[value] < s.Size
+	return s.index[value] < s.size.Value
 }
 
 func (s *Set) IsEmpty() bool {
-	return s.Size == 0
+	return s.size.Value == 0
 }
 
 // update min and max.
@@ -156,7 +162,7 @@ func (s *Set) updateBoundsValRemoved(val int) {
 }
 
 func (s *Set) updateMaxValRemoved(val int) {
-	if s.IsEmpty() || s.max != val {
+	if s.IsEmpty() || s.max.Value != val {
 		return
 	}
 
@@ -164,16 +170,16 @@ func (s *Set) updateMaxValRemoved(val int) {
 		panic("updateMaxValRemoved")
 	}
 
-	for v := val - 1; v >= s.min; v-- {
+	for v := val - 1; v >= s.min.Value; v-- {
 		if s.contains(v) {
-			s.max = v
+			s.max.Value = v
 			return
 		}
 	}
 }
 
 func (s *Set) updateMinValRemoved(val int) {
-	if s.IsEmpty() || s.min != val {
+	if s.IsEmpty() || s.min.Value != val {
 		return
 	}
 
@@ -181,9 +187,9 @@ func (s *Set) updateMinValRemoved(val int) {
 		panic("updateMinValRemoved")
 	}
 
-	for v := val + 1; v <= s.max; v++ {
+	for v := val + 1; v <= s.max.Value; v++ {
 		if s.contains(v) {
-			s.min = v
+			s.min.Value = v
 			return
 		}
 	}
